@@ -1,0 +1,16 @@
+const express=require("express");
+const path=require("path");
+const app=express();
+const PORT=process.env.PORT||10000;
+const publicDir=path.join(__dirname,"public");
+app.use(express.json());
+app.use(express.urlencoded({extended:true}));
+app.use(express.static(publicDir));
+let companies=[{id:1,name:"AdGem",type:"Offerwall",status:true}];
+app.get("/",(q,r)=>r.sendFile(path.join(publicDir,"index.html")));
+app.get("/admin",(q,r)=>r.sendFile(path.join(publicDir,"admin.html")));
+app.get("/api/health",(q,r)=>r.json({ok:true,service:"reward-app"}));
+app.get("/api/companies",(q,r)=>r.json(companies));
+app.post("/api/companies",(q,r)=>{if(!q.body.name)return r.status(400).json({error:"اسم الشركة مطلوب"});const c={id:Date.now(),name:String(q.body.name),type:String(q.body.type||"Offerwall"),status:true};companies.push(c);r.status(201).json(c)});
+app.delete("/api/companies/:id",(q,r)=>{companies=companies.filter(c=>c.id!==Number(q.params.id));r.json({ok:true})});
+app.listen(PORT,()=>console.log("Reward App running on "+PORT));
